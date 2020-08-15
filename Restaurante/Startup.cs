@@ -29,8 +29,7 @@ namespace Restaurante
         {
             services.AddControllers();
 
-            services.AddDbContext<RestauranteContext>(opt => 
-                opt.UseInMemoryDatabase("RestauranteDb"));
+            services.AddDbContext<RestauranteContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("RestauranteDb")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

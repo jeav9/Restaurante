@@ -39,7 +39,7 @@ namespace Restaurante.Controllers
         }
 
         //GetByMasterId
-        [HttpGet("{GetByOrderId/orderId}")]
+        [HttpGet("GetByOrderId/{orderId}")]
         public async Task<ActionResult> GetByOrderId(int orderId)
         {
             var orden = await _context.DetalleOrdenes.FirstOrDefaultAsync(s => s.OrderId == orderId);
@@ -52,7 +52,7 @@ namespace Restaurante.Controllers
         }
 
         //GetByFecha
-        [HttpGet("{GetByDate/date}")]
+        [HttpGet("GetByDate/{date}")]
         public async Task<ActionResult> GetByDate(DateTime date)
         {
             var orden = await _context.DetalleOrdenes.FirstOrDefaultAsync(s => s.Date == date);
