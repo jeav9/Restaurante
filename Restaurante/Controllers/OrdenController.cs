@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Restaurante.Core.OrdenManager;
 using Restaurante.Data;
 using Restaurante.Models;
 
@@ -13,105 +14,90 @@ namespace Restaurante.Controllers
     [ApiController]
     public class OrdenController : ControllerBase
     {
-        private readonly RestauranteContext _context;
-        public OrdenController(RestauranteContext context)
+        private readonly IOrdenManager _ordenManager;
+        public OrdenController(IOrdenManager ordenManager)
         {
-            _context = context;
-
-            if(_context.Productos.Count() == 0)
-            {
-                List<Producto> productos = new List<Producto>();
-                productos.Add(new Producto { Name = "Plato1", Description = "plato 1", Price = 20d });
-                productos.Add(new Producto { Name = "Plato2", Description = "plato 2", Price = 20d });
-                productos.Add(new Producto { Name = "Plato3", Description = "plato 3", Price = 20d });
-                _context.Productos.AddRange(productos);
-                _context.SaveChanges();
-            }
+            _ordenManager = ordenManager;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
-            var ordenes = await _context.Ordenes.Select(s => new Orden
+            var ordenesResultado = await _ordenManager.GetOrdenesAsync();
+            if (ordenesResultado.Success)
             {
-                Id = s.Id,
-                CashierName = s.CashierName,
-                ClientName = s.ClientName,
-                DetalleOrdenes = s.DetalleOrdenes
-            }).ToListAsync();
+                return Ok(ordenesResultado.Value);
+            }
 
-            return Ok(ordenes);
+            return NotFound(ordenesResultado.Errors);
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var orden = await _context.Ordenes.FirstOrDefaultAsync(s => s.Id == id);
-            if(orden == null)
+            var ordenResult = await _ordenManager.GetById(id);
+            if(ordenResult.Success)
             {
-                return NotFound();
+                return Ok(ordenResult.Value); 
             }
-
-            return Ok(orden);
+            return NotFound(ordenResult.Errors);
         }
 
-        // GetByNombre
+
         [HttpGet("GetByClientName/{name}")]
         public async Task<ActionResult> GetByClienteName(string name)
         {
-            var orden = await _context.Ordenes.FirstOrDefaultAsync(s => s.ClientName.Contains(name));
-            if (orden == null)
+            var ordenResult = await _ordenManager.GetByClientName(name);
+            if (ordenResult.Success)
             {
-                return NotFound();
+                return Ok(ordenResult.Value);
             }
-
-            return Ok(orden);
+            return NotFound(ordenResult.Errors);
         }
 
-        //GetByFecha
         [HttpGet("GetByDate/{date}")]
-        public async Task<ActionResult> GetByClienteName(DateTime date)
+        public async Task<ActionResult> GetByDate(DateTime date)
         {
-            var orden = await _context.Ordenes.FirstOrDefaultAsync(s => s.Date.Date == date.Date);
-            if (orden == null)
+            var ordenResult = await _ordenManager.GetByDate(date);
+            if (ordenResult.Success)
             {
-                return NotFound();
+                return Ok(ordenResult.Value);
             }
-
-            return Ok(orden);
+            return NotFound(ordenResult.Errors);
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(Orden orden)
         {
-            _context.Ordenes.Add(orden);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = orden.Id }, orden);
+            var result = await _ordenManager.Create(orden);
+            if (result.Success)
+            {
+                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, Orden orden)
         {
-            if (id == orden.Id)
+            var result = await _ordenManager.Update(orden, id);
+            if (result.Success)
             {
-                _context.Entry(orden).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-                return NoContent();
+                return Ok(result.Value);
             }
-            return BadRequest();
+            return BadRequest(result.Errors);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var orden = await _context.Ordenes.FindAsync(id);
-            if (orden == null)
+            var result = await _ordenManager.Delete(id);
+            if (result.Success)
             {
-                return NotFound();
+                return Ok(result.Value);
             }
-            _context.Ordenes.Remove(orden);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return BadRequest(result.Errors);
         }
     }
 }

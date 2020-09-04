@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Restaurante.Core.OrdenManager;
 using Restaurante.Data;
 
 namespace Restaurante
@@ -29,6 +30,15 @@ namespace Restaurante
         {
             services.AddControllers();
 
+            services.AddCors();
+
+            services.AddMvc().
+                AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            #region Inyeccion de dependencias
+            services.AddScoped<IOrdenManager, OrdenManager>();
+            #endregion
+
             services.AddDbContext<RestauranteContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("RestauranteDb")));
         }
 
@@ -39,6 +49,8 @@ namespace Restaurante
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseHttpsRedirection();
 
