@@ -86,9 +86,18 @@ namespace Restaurante.Core.OrdenManager
             var resultado = new ResultHelper<Orden>();
             try
             {
-                _context.Ordenes.Add(orden);
+                Orden nuevaOrden = new Orden
+                {
+                    CashierName = orden.CashierName,
+                    ClientName = orden.ClientName
+                };
+
+                _context.Ordenes.Add(nuevaOrden);
                 await _context.SaveChangesAsync();
-                resultado.Value = orden;
+
+                this.CrearDetalle(orden, nuevaOrden.Id);
+
+                resultado.Value = nuevaOrden;
             }
             catch(Exception e)
             {
@@ -137,9 +146,26 @@ namespace Restaurante.Core.OrdenManager
                     resultado.AddError(e.Message);
                 }
             }
-            resultado.AddError("La orden no existe");
+            else
+            {
+                resultado.AddError("La orden no existe");
+            }
+            
 
             return resultado;
+        }
+
+        private void CrearDetalle(Orden orden, int id)
+        {
+            var detalleOrden = orden.DetalleOrdenes.Select(order => new DetalleOrden
+            {
+                OrderId = id,
+                ProductId = order.ProductId,
+                Quantity = order.Quantity
+            }).ToList();
+
+            _context.DetalleOrdenes.AddRange(detalleOrden);
+             _context.SaveChanges();
         }
     }
 }

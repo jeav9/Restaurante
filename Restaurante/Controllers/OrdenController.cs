@@ -95,7 +95,7 @@ namespace Restaurante.Controllers
             var result = await _ordenManager.Delete(id);
             if (result.Success)
             {
-                return Ok(result.Value);
+                return NoContent();
             }
             return BadRequest(result.Errors);
         }
