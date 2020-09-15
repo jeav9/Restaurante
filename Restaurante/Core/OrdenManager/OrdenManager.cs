@@ -95,6 +95,29 @@ namespace Restaurante.Core.OrdenManager
                 _context.Ordenes.Add(nuevaOrden);
                 await _context.SaveChangesAsync();
 
+                resultado.Value = nuevaOrden;
+            }
+            catch (Exception e)
+            {
+                resultado.AddError(e.Message);
+            }
+            return resultado;
+        }
+
+        public async Task<ResultHelper<Orden>> CreateWithDetails(Orden orden)
+        {
+            var resultado = new ResultHelper<Orden>();
+            try
+            {
+                Orden nuevaOrden = new Orden
+                {
+                    CashierName = orden.CashierName,
+                    ClientName = orden.ClientName
+                };
+
+                _context.Ordenes.Add(nuevaOrden);
+                await _context.SaveChangesAsync();
+
                 this.CrearDetalle(orden, nuevaOrden.Id);
 
                 resultado.Value = nuevaOrden;

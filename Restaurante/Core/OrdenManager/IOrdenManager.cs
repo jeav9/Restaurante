@@ -14,6 +14,7 @@ namespace Restaurante.Core.OrdenManager
         Task<ResultHelper<Orden>> GetByClientName(string name);
         Task<ResultHelper<Orden>> GetByDate(DateTime date);
         Task<ResultHelper<Orden>> Create(Orden orden);
+        Task<ResultHelper<Orden>> CreateWithDetails(Orden orden);
         Task<ResultHelper<Orden>> Update(Orden orden, int id);
         Task<ResultHelper<string>> Delete(int id);
     }

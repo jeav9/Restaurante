@@ -78,6 +78,17 @@ namespace Restaurante.Controllers
             return BadRequest(result.Errors);
         }
 
+        [HttpPost("CreateWithDetails")]
+        public async Task<ActionResult> PostWithDetails(Orden orden)
+        {
+            var result = await _ordenManager.CreateWithDetails(orden);
+            if (result.Success)
+            {
+                return CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value);
+            }
+            return BadRequest(result.Errors);
+        }
+
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, Orden orden)
         {
