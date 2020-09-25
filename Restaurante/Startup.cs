@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Restaurante.Core.OrdenManager;
 using Restaurante.Data;
+using Restaurante.DomainServices;
 
 namespace Restaurante
 {
@@ -37,6 +38,7 @@ namespace Restaurante
 
             #region Inyeccion de dependencias
             services.AddScoped<IOrdenManager, OrdenManager>();
+            services.AddScoped<OrdenDomainService>();
             #endregion
 
             services.AddDbContext<RestauranteContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("RestauranteDb")));

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Data;
+using Restaurante.DomainServices;
 using Restaurante.Helpers;
 using Restaurante.Models;
 using System;
@@ -12,9 +13,12 @@ namespace Restaurante.Core.OrdenManager
     public class OrdenManager : IOrdenManager
     {
         private readonly RestauranteContext _context;
-        public OrdenManager(RestauranteContext context)
+        private readonly OrdenDomainService _ordenDomainService;
+        public OrdenManager(RestauranteContext context,
+            OrdenDomainService ordenDomainService)
         {
             _context = context;
+            _ordenDomainService = ordenDomainService;
         }
 
         public async Task<ResultHelper<IEnumerable<Orden>>> GetOrdenesAsync()
@@ -109,11 +113,15 @@ namespace Restaurante.Core.OrdenManager
             var resultado = new ResultHelper<Orden>();
             try
             {
-                Orden nuevaOrden = new Orden
+                Orden nuevaOrden;
+
+                var resultadoDeOrden = _ordenDomainService.ValidateIfCreateOrder(orden);
+                
+                if(!resultadoDeOrden.Success)
                 {
-                    CashierName = orden.CashierName,
-                    ClientName = orden.ClientName
-                };
+                    return resultadoDeOrden;
+                }
+                nuevaOrden = resultadoDeOrden.Value;
 
                 _context.Ordenes.Add(nuevaOrden);
                 await _context.SaveChangesAsync();
